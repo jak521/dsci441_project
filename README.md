@@ -5,3 +5,13 @@ Depression, anxiety, and obesity have been on the rise in the United States for 
 This project will use both Statisical Modeling and Machine Learning methodologies. For statistical modeling, it will use Chi-Square testing since the data is entirely categorical. Milestone 1 will solely look at the RELPER (extent of religion) and CURREL (specific religious affiliation) features as inputs. It will also look at the HAPPY (self-rated happiness level) and SUCCESS (sum of HAPPY, INC_SDT1 for income level, and EDUCREC for educational attainment level) features as the targets. Milestone 2 may expolore other features and targets, such as immigration status, internet usage, number of kids, political views, and more. For the machine learning part of Milestone 1, Logistic Regression is used. Due to the unbalanced nature of the data, balancing parameters were used to help prevent overfitting and only one outcome prediction. A combination of RELPER and CURREL were also used to see if the interaction yielded a better model. In the future, more model parameters and interactions will be explored to improve the model. More ML classification methodologies will also be explored as the semester progresses, such as random forests, PCA with Trees, and Neural Networks.
 
 The data comes from Pew Research Center: https://www.pewresearch.org/dataset/2023-24-religious-landscape-study-rls-dataset/
+
+Packages required:
+- pandas
+- matplotlib
+- numpy
+- seaborn
+- scipy
+- sklearn
+- itertools
+- streamlit
