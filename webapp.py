@@ -115,8 +115,74 @@ elif plot_option == 'CURREL vs SUCCESS':
     st.pyplot(plt)
 
 
+    # ----------- PLOTS: Y-axis is always HAPPY ------------
+st.subheader("Proportion Plots: Feature vs. Happiness")
+
+happy_features = ['RELPER', 'CURREL_SEGMENTED', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']  # features to compare with HAPPY
+x_happy = st.selectbox("Select x-axis feature (vs. HAPPY):", happy_features, key="happy_plot")
+df_tree = df_tree[df_tree[x_happy] != 99]
+# Also make sure to filter 'CURREL' != 900000 if still needed
+df_tree = df_tree[df_tree['CURREL'] != 900000]
+# also filter our output of HAPPY
+df_tree = df_tree[df_tree['HAPPY'] != 99]
+
+if x_happy in df_tree.columns:
+    prop_plot = df_tree.groupby([x_happy, 'HAPPY']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)
+
+    # Choose color palette
+    happy_colors = ['#006400', '#99FF99', '#FF6347']
+
+    # Create plot
+    prop_plot.plot(kind='bar', stacked=True, color=happy_colors)
+    plt.title(f"Proportions of Happiness by {x_happy}")
+    plt.ylabel("Proportion")
+    if x_happy == 'RELPER':
+        plt.xticks(ticks=[0,1,2,3], labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at All Religious'])
+    elif x_happy == 'USGEN':
+        plt.xticks(ticks=[0,1,2], labels=['Immigrant', 'Child of Immigrant(s)', 'Neither'])
+    else:
+        plt.xticks(rotation=0)
+    plt.legend(title='Happiness', labels=['Very Happy', 'Pretty Happy', 'Not Too Happy'], bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
+
+
+# ----------- PLOTS: Y-axis is always SUCCESS ------------
+st.subheader("Proportion Plots: Feature vs. Success")
+
+success_features = ['RELPER', 'CURREL_SEGMENTED', 'FERTREC', 'INC_SDT1', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']  # features to compare with SUCCESS
+x_success = st.selectbox("Select x-axis feature (vs. SUCCESS):", success_features, key="success_plot")
+
+df_tree = df_tree[df_tree[x_success] != 99]
+# Also make sure to filter 'CURREL' != 900000 if still needed
+df_tree = df_tree[df_tree['CURREL'] != 900000]
+# also filter our output of HAPPY
+df_tree = df_tree[df_tree['HAPPY'] != 99]
+
+if x_success in df_tree.columns:
+    prop_plot = df_tree.groupby([x_success, 'SUCCESS']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)
+
+    # Gradient color palette
+    num_bins = prop_plot.shape[1]
+    cmap = plt.cm.RdYlGn
+    colors = [cmap(i / num_bins) for i in range(num_bins)]
+
+    # Create plot
+    prop_plot.plot(kind='bar', stacked=True, color=colors)
+    plt.title(f"Proportions of Success by {x_success}")
+    plt.ylabel("Proportion")
+    if x_success == 'RELPER':
+        plt.xticks(ticks=[0,1,2,3], labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at All Religious'])
+    else:
+        plt.xticks(rotation=0)
+    plt.legend(title='Success', bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
+
+
+
 # Features to consider
-features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']
+features = ['RELPER', 'CURREL_SEGMENTED', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']
 
 # Step 1: Let user pick a subset of features
 selected_features_pool = st.multiselect("Select features to explore:", features, default=[])
@@ -128,7 +194,6 @@ for r in range(1, len(selected_features_pool) + 1):
 
 combo_names = [', '.join(combo) for combo in feature_combos]
 
-df_tree = df_tree.copy()
 for feature in selected_features_pool:
     df_tree = df_tree[df_tree[feature] != 99]
 # Also make sure to filter 'CURREL' != 900000 if still needed
