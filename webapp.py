@@ -11,7 +11,7 @@ from io import BytesIO
 def load_data():
     df = pd.read_csv("../../pew_data/2023-24 RLS Public Use File Feb 19.csv") 
     df_exclude_refused = df.fillna(99)
-    df_tree = df_exclude_refused[(df_exclude_refused['RELPER'] != 99) & (df_exclude_refused['HAPPY'] != 99) & (df_exclude_refused['CURREL'] != 900000) & (df_exclude_refused['INC_SDT1'] != 99) & (df_exclude_refused['FERTREC'] != 99)]
+    df_tree = df_exclude_refused[(df_exclude_refused['RELPER'] != 99) & (df_exclude_refused['HAPPY'] != 99) & (df_exclude_refused['CURREL'] != 900000) & (df_exclude_refused['INC_SDT1'] != 99) & (df_exclude_refused['FERTREC'] != 99) & (df_exclude_refused['INC_SDT1'] != 99) & (df_exclude_refused['USGEN'] != 99)]
     df_tree['CURREL_SEGMENTED'] = df_tree['CURREL'].apply(
         lambda x: 'Catholic' if x == 10000 else 
                 'Protestant' if x == 1000 else 
@@ -71,3 +71,34 @@ st.image(buf)
 
 # Optional: Save the image to a file (if needed)
 # plt.savefig("decision_tree_highres.png", bbox_inches='tight')
+
+
+import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Define the toggle (Selectbox for plot selection)
+plot_option = st.selectbox('Choose plot', ['RELPER vs HAPPY', 'USGEN vs RELPER'])
+
+# Create the plots based on selection
+if plot_option == 'RELPER vs HAPPY':
+    # Create RELPER vs HAPPY proportion bar plot
+    prop_plot = df_tree.groupby(['RELPER', 'HAPPY']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
+    prop_plot.plot(kind='bar', stacked=True, color=['#006400', '#99FF99', '#FF6347'])
+    plt.title("Proportions of Happiness by RELPER")
+    plt.ylabel("Proportion")
+    plt.xticks(ticks=[0,1,2,3], labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at All Religious'])
+    plt.legend(title='Happiness', labels=['Very Happy', 'Pretty Happy', 'Not Too Happy'], bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
+
+elif plot_option == 'USGEN vs RELPER':
+    # Create USGEN vs RELPER proportion bar plot
+    prop_plot = df_tree.groupby(['USGEN', 'RELPER']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
+    prop_plot.plot(kind='bar', stacked=True, color=['#006400', '#99FF99', '#FFB6C1', '#FF6347'])
+    plt.title("Proportions of RELPER by USGEN")
+    plt.ylabel("Proportion")
+    plt.xticks(ticks=[0,1,2], labels=['Immigrant', 'Child of Immigrant(s)', 'Neither'])
+    plt.legend(title='Religion', labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at all Religious'], bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
