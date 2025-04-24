@@ -157,14 +157,25 @@ elif plot_option == 'CURREL vs SUCCESS':
 
 
 # Features to consider
-features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN']
+features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']
+
+# Step 1: Let user pick a subset of features
+selected_features_pool = st.multiselect("Select features to explore:", features, default=features)
 
 # Generate all combinations
 feature_combos = []
-for r in range(1, len(features) + 1):
-    feature_combos.extend(itertools.combinations(features, r))
+for r in range(1, len(selected_features_pool) + 1):
+    feature_combos.extend(itertools.combinations(selected_features_pool, r))
 
 combo_names = [', '.join(combo) for combo in feature_combos]
+
+df_tree = df_tree.copy()
+for feature in selected_features_pool:
+    df_tree = df_tree[df_tree[feature] != 99]
+# Also make sure to filter 'CURREL' != 900000 if still needed
+df_tree = df_tree[df_tree['CURREL'] != 900000]
+# also filter our output of HAPPY
+df_tree = df_tree[df_tree['HAPPY'] != 99]
 
 # -------- Balanced Logistic Regression --------
 st.subheader('Logistic Regression (Balanced Weights)')
@@ -215,14 +226,6 @@ plt.ylabel('Actual')
 st.pyplot(plt)
 
 st.subheader("Decision Tree Plot Explorer")
-
-# Features and combinations
-features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN']
-feature_combos = []
-for r in range(1, len(features) + 1):
-    feature_combos.extend(itertools.combinations(features, r))
-
-combo_names = [', '.join(combo) for combo in feature_combos]
 
 # Tree combo selector
 selected_combo_tree = st.selectbox("Choose Features for Decision Tree:", combo_names, key='tree_combo')
