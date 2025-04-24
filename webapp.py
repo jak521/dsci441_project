@@ -43,6 +43,10 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.header('Faith, Happiness, and Success:Exploring Socioeconomic and Religious Trends in the U.S.')
+
+st.subheader('Proportion Bar Charts')
+
 # Define the toggle (Selectbox for plot selection)
 plot_option = st.selectbox('Choose plot', ['RELPER vs HAPPY', 'USGEN vs RELPER', 'RELPER vs SUCCESS', 'CURREL vs HAPPY', 'CURREL vs SUCCESS'])
 
