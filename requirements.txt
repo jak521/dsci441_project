@@ -3,6 +3,6 @@ matplotlib
 numpy
 seaborn
 scipy
-sklearn
+scikit-learn
 itertools
 streamlit
