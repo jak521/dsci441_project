@@ -12,7 +12,7 @@ from io import BytesIO
 # Step 1: Load the data
 @st.cache
 def load_data():
-    df = pd.read_csv("./data/2023-24 RLS Public Use File Feb 19.csv") 
+    df = pd.read_csv("../data/2023-24 RLS Public Use File Feb 19.csv") 
     df_exclude_refused = df.fillna(99)
     df_tree = df_exclude_refused[(df_exclude_refused['RELPER'] != 99) & (df_exclude_refused['HAPPY'] != 99) & (df_exclude_refused['CURREL'] != 900000) & (df_exclude_refused['INC_SDT1'] != 99) & (df_exclude_refused['FERTREC'] != 99) & (df_exclude_refused['INC_SDT1'] != 99) & (df_exclude_refused['USGEN'] != 99)]
     df_tree['CURREL_SEGMENTED'] = df_tree['CURREL'].apply(

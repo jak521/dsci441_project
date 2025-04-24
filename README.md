@@ -15,3 +15,5 @@ Packages required:
 - sklearn
 - itertools
 - streamlit
+
+python get_data.py && python webapp.py
