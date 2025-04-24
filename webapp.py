@@ -1,10 +1,12 @@
+import itertools
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 from io import BytesIO
 
 # Step 1: Load the data
@@ -152,3 +154,62 @@ elif plot_option == 'CURREL vs SUCCESS':
     plt.xticks(rotation=0)
     plt.legend(title='Legend', bbox_to_anchor=(1.05, 1), loc='upper left')
     st.pyplot(plt)
+
+
+# Features to consider
+features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN']
+
+# Generate all combinations
+feature_combos = []
+for r in range(1, len(features) + 1):
+    feature_combos.extend(itertools.combinations(features, r))
+
+combo_names = [', '.join(combo) for combo in feature_combos]
+
+# -------- Balanced Logistic Regression --------
+st.subheader('Logistic Regression (Balanced Weights)')
+selected_combo_bal = st.selectbox('Choose Features (Balanced):', combo_names, key='balanced_combo')
+selected_features_bal = selected_combo_bal.split(', ')
+
+X_bal = df_tree[selected_features_bal]
+y_bal = df_tree['HAPPY_ONE_THREE']
+
+X_train_bal, X_test_bal, y_train_bal, y_test_bal = train_test_split(X_bal, y_bal, test_size=0.3, random_state=42)
+log_reg_bal = LogisticRegression(class_weight='balanced', random_state=9, max_iter=1000)
+log_reg_bal.fit(X_train_bal, y_train_bal)
+
+y_pred_bal = log_reg_bal.predict(X_test_bal)
+accuracy_bal = accuracy_score(y_test_bal, y_pred_bal)
+st.write(f'**Accuracy (Balanced):** {accuracy_bal * 100:.2f}%')
+
+cm_bal = confusion_matrix(y_test_bal, y_pred_bal)
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm_bal, annot=True, fmt='d', cmap='Blues', xticklabels=['Unhappy', 'Happy'], yticklabels=['Unhappy', 'Happy'])
+plt.title('Confusion Matrix (Balanced)')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+st.pyplot(plt)
+
+# -------- Unbalanced Logistic Regression --------
+st.subheader('Logistic Regression (Unbalanced)')
+selected_combo_unbal = st.selectbox('Choose Features (Unbalanced):', combo_names, key='unbalanced_combo')
+selected_features_unbal = selected_combo_unbal.split(', ')
+
+X_unbal = df_tree[selected_features_unbal]
+y_unbal = df_tree['HAPPY_ONE_THREE']
+
+X_train_unbal, X_test_unbal, y_train_unbal, y_test_unbal = train_test_split(X_unbal, y_unbal, test_size=0.3, random_state=42)
+log_reg_unbal = LogisticRegression(random_state=9, max_iter=1000)
+log_reg_unbal.fit(X_train_unbal, y_train_unbal)
+
+y_pred_unbal = log_reg_unbal.predict(X_test_unbal)
+accuracy_unbal = accuracy_score(y_test_unbal, y_pred_unbal)
+st.write(f'**Accuracy (Unbalanced):** {accuracy_unbal * 100:.2f}%')
+
+cm_unbal = confusion_matrix(y_test_unbal, y_pred_unbal)
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm_unbal, annot=True, fmt='d', cmap='Oranges', xticklabels=['Unhappy', 'Happy'], yticklabels=['Unhappy', 'Happy'])
+plt.title('Confusion Matrix (Unbalanced)')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+st.pyplot(plt)
