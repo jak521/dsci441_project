@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,6 +24,14 @@ def load_data():
     df_tree = df_tree[df_tree['CURREL_SEGMENTED'] != 'Refused']
     df_tree['HAPPY_ONE_THREE'] = df_tree['HAPPY'].apply(lambda x: 1 if x == 1 else 0)
     df_tree['CURREL_SEGMENTED_ENC'] = df_tree['CURREL_SEGMENTED'].astype('category').cat.codes
+    df_tree['HAPPY_INVERTED'] = df_tree['HAPPY'].replace({1: 3, 2: 2, 3: 1})  # Swap 1 and 3, keep 2 the same
+    df_tree['SUCCESS'] = np.where(
+        df_tree[['INC_SDT1', 'HAPPY_INVERTED', 'EDUCREC']].eq(99).any(axis=1),
+        np.nan,  # Set to NaN if any value is 99
+        df_tree['INC_SDT1'] + df_tree['HAPPY_INVERTED'] + df_tree['EDUCREC']
+    )   
+
+    df_tree = df_tree.dropna(subset=['SUCCESS'])
     return df_tree
 
 
@@ -78,7 +87,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Define the toggle (Selectbox for plot selection)
-plot_option = st.selectbox('Choose plot', ['RELPER vs HAPPY', 'USGEN vs RELPER'])
+plot_option = st.selectbox('Choose plot', ['RELPER vs HAPPY', 'USGEN vs RELPER', 'RELPER vs SUCCESS'])
 
 # Create the plots based on selection
 if plot_option == 'RELPER vs HAPPY':
@@ -101,4 +110,19 @@ elif plot_option == 'USGEN vs RELPER':
     plt.ylabel("Proportion")
     plt.xticks(ticks=[0,1,2], labels=['Immigrant', 'Child of Immigrant(s)', 'Neither'])
     plt.legend(title='Religion', labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at all Religious'], bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
+
+
+elif plot_option == 'RELPER vs SUCCESS':
+    # Create RELPER vs SUCCESS proportion bar plot
+    prop_plot = df_tree.groupby(['RELPER', 'SUCCESS']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
+    num_bins = 13
+    cmap = plt.cm.RdYlGn  # Red-Yellow-Green colormap (green -> red)
+    colors = [cmap(i / num_bins) for i in range(num_bins)]
+    prop_plot.plot(kind='bar', stacked=True, color=colors)
+    plt.title("Proportions of RELPER by SUCCESS")
+    plt.ylabel("Proportion")
+    plt.xticks(ticks=[0,1,2,3], labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at All Religious'])
+    plt.legend(title='Legend', bbox_to_anchor=(1.05, 1), loc='upper left')
     st.pyplot(plt)
