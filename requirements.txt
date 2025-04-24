@@ -3,7 +3,6 @@ matplotlib
 numpy
 seaborn
 scipy
-scikit-learn
-itertools
+scikit-learn>=1.2.0
 streamlit
 gdown
