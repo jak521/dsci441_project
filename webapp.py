@@ -123,7 +123,7 @@ if x_success in df_tree.columns:
 
 
 # Features to consider
-features = ['RELPER', 'CURREL_SEGMENTED', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']
+features = ['RELPER', 'CURREL_SEGMENTED_ENC', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']
 
 # Step 1: Let user pick a subset of features
 selected_features_pool = st.multiselect("Select features to explore:", features, default=[])
