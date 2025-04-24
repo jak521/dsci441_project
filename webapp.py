@@ -87,7 +87,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Define the toggle (Selectbox for plot selection)
-plot_option = st.selectbox('Choose plot', ['RELPER vs HAPPY', 'USGEN vs RELPER', 'RELPER vs SUCCESS'])
+plot_option = st.selectbox('Choose plot', ['RELPER vs HAPPY', 'USGEN vs RELPER', 'RELPER vs SUCCESS', 'CURREL vs HAPPY', 'CURREL vs SUCCESS'])
 
 # Create the plots based on selection
 if plot_option == 'RELPER vs HAPPY':
@@ -95,7 +95,7 @@ if plot_option == 'RELPER vs HAPPY':
     prop_plot = df_tree.groupby(['RELPER', 'HAPPY']).size().unstack().fillna(0)
     prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
     prop_plot.plot(kind='bar', stacked=True, color=['#006400', '#99FF99', '#FF6347'])
-    plt.title("Proportions of Happiness by RELPER")
+    plt.title("Proportions of Happiness by Extent of Religion")
     plt.ylabel("Proportion")
     plt.xticks(ticks=[0,1,2,3], labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at All Religious'])
     plt.legend(title='Happiness', labels=['Very Happy', 'Pretty Happy', 'Not Too Happy'], bbox_to_anchor=(1.05, 1), loc='upper left')
@@ -106,7 +106,7 @@ elif plot_option == 'USGEN vs RELPER':
     prop_plot = df_tree.groupby(['USGEN', 'RELPER']).size().unstack().fillna(0)
     prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
     prop_plot.plot(kind='bar', stacked=True, color=['#006400', '#99FF99', '#FFB6C1', '#FF6347'])
-    plt.title("Proportions of RELPER by USGEN")
+    plt.title("Proportions of Extent of Religion by Immigration Status")
     plt.ylabel("Proportion")
     plt.xticks(ticks=[0,1,2], labels=['Immigrant', 'Child of Immigrant(s)', 'Neither'])
     plt.legend(title='Religion', labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at all Religious'], bbox_to_anchor=(1.05, 1), loc='upper left')
@@ -121,8 +121,34 @@ elif plot_option == 'RELPER vs SUCCESS':
     cmap = plt.cm.RdYlGn  # Red-Yellow-Green colormap (green -> red)
     colors = [cmap(i / num_bins) for i in range(num_bins)]
     prop_plot.plot(kind='bar', stacked=True, color=colors)
-    plt.title("Proportions of RELPER by SUCCESS")
+    plt.title("Proportions of Success by Extent of Religion")
     plt.ylabel("Proportion")
     plt.xticks(ticks=[0,1,2,3], labels=['Very Religious', 'Somewhat Religious', 'Not Too Religious', 'Not at All Religious'])
+    plt.legend(title='Legend', bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
+
+
+elif plot_option == 'CURREL vs HAPPY':
+    # Create RELPER vs SUCCESS proportion bar plot
+    prop_plot = df_tree.groupby(['CURREL_SEGMENTED', 'HAPPY']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
+    prop_plot.plot(kind='bar', stacked=True, color=['#006400', '#99FF99', '#FF6347'])
+    plt.title("Proportions of Happiness by Current Religion")
+    plt.ylabel("Proportion")
+    plt.xticks(rotation=0)
+    plt.legend(title='Happiness', labels=['Very Happy', 'Pretty Happy', 'Not Too Happy'], bbox_to_anchor=(1.05, 1), loc='upper left')
+    st.pyplot(plt)
+
+elif plot_option == 'CURREL vs SUCCESS':
+    # Create RELPER vs SUCCESS proportion bar plot
+    prop_plot = df_tree.groupby(['CURREL_SEGMENTED', 'SUCCESS']).size().unstack().fillna(0)
+    prop_plot = prop_plot.div(prop_plot.sum(axis=1), axis=0)  # Proportions
+    num_bins = 13
+    cmap = plt.cm.RdYlGn  # Red-Yellow-Green colormap (green -> red)
+    colors = [cmap(i / num_bins) for i in range(num_bins)]
+    prop_plot.plot(kind='bar', stacked=True, color=colors)
+    plt.title("Proportions of Success by Current Religion")
+    plt.ylabel("Proportion")
+    plt.xticks(rotation=0)
     plt.legend(title='Legend', bbox_to_anchor=(1.05, 1), loc='upper left')
     st.pyplot(plt)
