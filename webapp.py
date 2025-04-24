@@ -115,7 +115,7 @@ elif plot_option == 'CURREL vs SUCCESS':
 features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN', 'PARTY', 'REGION', 'ATTNDPERRLS', 'RELIMP', 'GOD', 'HVN', 'PRAY', 'RTRT', 'CHILDREN', 'BIRTHDECADE', 'RACECMB', 'IDEO', 'INTFREQ', 'GENDER']
 
 # Step 1: Let user pick a subset of features
-selected_features_pool = st.multiselect("Select features to explore:", features, default=features)
+selected_features_pool = st.multiselect("Select features to explore:", features, default=[])
 
 # Generate all combinations
 feature_combos = []
@@ -132,81 +132,87 @@ df_tree = df_tree[df_tree['CURREL'] != 900000]
 # also filter our output of HAPPY
 df_tree = df_tree[df_tree['HAPPY'] != 99]
 
-# -------- Balanced Logistic Regression --------
-st.subheader('Logistic Regression (Balanced Weights)')
-selected_combo_bal = st.selectbox('Choose Features (Balanced):', combo_names, key='balanced_combo')
-selected_features_bal = selected_combo_bal.split(', ')
+# If df_tree is empty after filtering, show warning and stop
+if df_tree.empty:
+    st.warning("You've selected too many features. Reduce your selection for data to populate.")
+elif len(selected_features_pool) == 0:
+    st.warning("Please select at least one feature to display model outputs.")
+else:
+    # -------- Balanced Logistic Regression --------
+    st.subheader('Logistic Regression (Balanced Weights)')
+    selected_combo_bal = st.selectbox('Choose Features (Balanced):', combo_names, key='balanced_combo')
+    selected_features_bal = selected_combo_bal.split(', ')
 
-X_bal = df_tree[selected_features_bal]
-y_bal = df_tree['HAPPY_ONE_THREE']
+    X_bal = df_tree[selected_features_bal]
+    y_bal = df_tree['HAPPY_ONE_THREE']
 
-X_train_bal, X_test_bal, y_train_bal, y_test_bal = train_test_split(X_bal, y_bal, test_size=0.3, random_state=42)
-log_reg_bal = LogisticRegression(class_weight='balanced', random_state=9, max_iter=1000)
-log_reg_bal.fit(X_train_bal, y_train_bal)
+    X_train_bal, X_test_bal, y_train_bal, y_test_bal = train_test_split(X_bal, y_bal, test_size=0.3, random_state=42)
+    log_reg_bal = LogisticRegression(class_weight='balanced', random_state=9, max_iter=1000)
+    log_reg_bal.fit(X_train_bal, y_train_bal)
 
-y_pred_bal = log_reg_bal.predict(X_test_bal)
-accuracy_bal = accuracy_score(y_test_bal, y_pred_bal)
-st.write(f'**Accuracy (Balanced):** {accuracy_bal * 100:.2f}%')
+    y_pred_bal = log_reg_bal.predict(X_test_bal)
+    accuracy_bal = accuracy_score(y_test_bal, y_pred_bal)
+    st.write(f'**Accuracy (Balanced):** {accuracy_bal * 100:.2f}%')
 
-cm_bal = confusion_matrix(y_test_bal, y_pred_bal)
-plt.figure(figsize=(6, 5))
-sns.heatmap(cm_bal, annot=True, fmt='d', cmap='Blues', xticklabels=['Unhappy', 'Happy'], yticklabels=['Unhappy', 'Happy'])
-plt.title('Confusion Matrix (Balanced)')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-st.pyplot(plt)
+    cm_bal = confusion_matrix(y_test_bal, y_pred_bal)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm_bal, annot=True, fmt='d', cmap='Blues', xticklabels=['Unhappy', 'Happy'], yticklabels=['Unhappy', 'Happy'])
+    plt.title('Confusion Matrix (Balanced)')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    st.pyplot(plt)
 
-# -------- Unbalanced Logistic Regression --------
-st.subheader('Logistic Regression (Unbalanced)')
-selected_combo_unbal = st.selectbox('Choose Features (Unbalanced):', combo_names, key='unbalanced_combo')
-selected_features_unbal = selected_combo_unbal.split(', ')
+    # -------- Unbalanced Logistic Regression --------
+    st.subheader('Logistic Regression (Unbalanced)')
+    selected_combo_unbal = st.selectbox('Choose Features (Unbalanced):', combo_names, key='unbalanced_combo')
+    selected_features_unbal = selected_combo_unbal.split(', ')
 
-X_unbal = df_tree[selected_features_unbal]
-y_unbal = df_tree['HAPPY_ONE_THREE']
+    X_unbal = df_tree[selected_features_unbal]
+    y_unbal = df_tree['HAPPY_ONE_THREE']
 
-X_train_unbal, X_test_unbal, y_train_unbal, y_test_unbal = train_test_split(X_unbal, y_unbal, test_size=0.3, random_state=42)
-log_reg_unbal = LogisticRegression(random_state=9, max_iter=1000)
-log_reg_unbal.fit(X_train_unbal, y_train_unbal)
+    X_train_unbal, X_test_unbal, y_train_unbal, y_test_unbal = train_test_split(X_unbal, y_unbal, test_size=0.3, random_state=42)
+    log_reg_unbal = LogisticRegression(random_state=9, max_iter=1000)
+    log_reg_unbal.fit(X_train_unbal, y_train_unbal)
 
-y_pred_unbal = log_reg_unbal.predict(X_test_unbal)
-accuracy_unbal = accuracy_score(y_test_unbal, y_pred_unbal)
-st.write(f'**Accuracy (Unbalanced):** {accuracy_unbal * 100:.2f}%')
+    y_pred_unbal = log_reg_unbal.predict(X_test_unbal)
+    accuracy_unbal = accuracy_score(y_test_unbal, y_pred_unbal)
+    st.write(f'**Accuracy (Unbalanced):** {accuracy_unbal * 100:.2f}%')
 
-cm_unbal = confusion_matrix(y_test_unbal, y_pred_unbal)
-plt.figure(figsize=(6, 5))
-sns.heatmap(cm_unbal, annot=True, fmt='d', cmap='Oranges', xticklabels=['Unhappy', 'Happy'], yticklabels=['Unhappy', 'Happy'])
-plt.title('Confusion Matrix (Unbalanced)')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-st.pyplot(plt)
+    cm_unbal = confusion_matrix(y_test_unbal, y_pred_unbal)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm_unbal, annot=True, fmt='d', cmap='Oranges', xticklabels=['Unhappy', 'Happy'], yticklabels=['Unhappy', 'Happy'])
+    plt.title('Confusion Matrix (Unbalanced)')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    st.pyplot(plt)
 
-st.subheader("Decision Tree Plot Explorer")
+    st.subheader("Decision Tree Plot Explorer")
 
-# Tree depth selector
-max_depth = st.slider("Select max depth of the Decision Tree:", min_value=1, max_value=10, value=5, step=1)
+    # Tree depth selector
+    max_depth = st.slider("Select max depth of the Decision Tree:", min_value=1, max_value=10, value=5, step=1)
 
-# Tree combo selector
-selected_combo_tree = st.selectbox("Choose Features for Decision Tree:", combo_names, key='tree_combo')
-selected_features_tree = selected_combo_tree.split(', ')
+    # Tree combo selector
+    selected_combo_tree = st.selectbox("Choose Features for Decision Tree:", combo_names, key='tree_combo')
+    selected_features_tree = selected_combo_tree.split(', ')
 
-# Define X and y
-X_tree = df_tree[selected_features_tree]
-y_tree = df_tree['HAPPY_ONE_THREE']
+    # Define X and y
+    X_tree = df_tree[selected_features_tree]
+    y_tree = df_tree['HAPPY_ONE_THREE']
 
-# Fit the decision tree
-tree_model = DecisionTreeClassifier(random_state=42, max_depth=max_depth)
-tree_model.fit(X_tree, y_tree)
+    # Fit the decision tree
+    tree_model = DecisionTreeClassifier(random_state=42, max_depth=max_depth)
+    tree_model.fit(X_tree, y_tree)
 
-# Export to graphviz
-dot_data = export_graphviz(
-    tree_model,
-    out_file=None,
-    feature_names=selected_features_tree,
-    class_names=['Unhappy', 'Happy'],
-    filled=True,
-    rounded=True,
-    special_characters=True
-)
+    # Export to graphviz
+    dot_data = export_graphviz(
+        tree_model,
+        out_file=None,
+        feature_names=selected_features_tree,
+        class_names=['Unhappy', 'Happy'],
+        filled=True,
+        rounded=True,
+        special_characters=True
+    )
 
-# Render graph in Streamlit
-st.graphviz_chart(dot_data)
+    # Render graph in Streamlit
+    st.graphviz_chart(dot_data)
