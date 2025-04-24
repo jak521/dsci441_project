@@ -39,51 +39,6 @@ def load_data():
 
 df_tree = load_data()
 
-# Step 2: Feature Selection
-X = df_tree[['RELPER', 'CURREL_SEGMENTED_ENC', 'USGEN', 'INC_SDT1', 'FERTREC']]
-y = df_tree['HAPPY_ONE_THREE']
-
-# Step 3: Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
-
-# Step 4: Initialize and Train the Decision Tree Classifier
-tree_model = DecisionTreeClassifier(max_depth=5, random_state=42)
-tree_model.fit(X_train, y_train)
-
-# Step 5: Predict and Evaluate the Model
-y_pred = tree_model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-class_report = classification_report(y_test, y_pred)
-
-# Step 6: Displaying the Model Evaluation Metrics
-st.title("Decision Tree Model for Happiness Prediction")
-st.subheader("Model Evaluation")
-st.write(f"### Accuracy: {accuracy * 100:.2f}%")
-st.write(f"### Classification Report:\n{class_report}")
-
-# Step 7: Decision Tree Visualization
-st.subheader("Decision Tree Visualization")
-
-# Create the plot and save it to a BytesIO object to display in Streamlit
-fig, ax = plt.subplots(figsize=(20, 10), dpi=300)
-plot_tree(tree_model, 
-          feature_names=X.columns, 
-          class_names=['Not Happy', 'Very Happy'], 
-          filled=True, 
-          rounded=True)
-
-# Save the figure to a buffer
-buf = BytesIO()
-plt.savefig(buf, format="png")
-buf.seek(0)
-
-# Display the figure in Streamlit
-st.image(buf)
-
-# Optional: Save the image to a file (if needed)
-# plt.savefig("decision_tree_highres.png", bbox_inches='tight')
-
-
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -227,6 +182,9 @@ st.pyplot(plt)
 
 st.subheader("Decision Tree Plot Explorer")
 
+# Tree depth selector
+max_depth = st.slider("Select max depth of the Decision Tree:", min_value=1, max_value=10, value=5, step=1)
+
 # Tree combo selector
 selected_combo_tree = st.selectbox("Choose Features for Decision Tree:", combo_names, key='tree_combo')
 selected_features_tree = selected_combo_tree.split(', ')
@@ -236,7 +194,7 @@ X_tree = df_tree[selected_features_tree]
 y_tree = df_tree['HAPPY_ONE_THREE']
 
 # Fit the decision tree
-tree_model = DecisionTreeClassifier(random_state=42, max_depth=5)
+tree_model = DecisionTreeClassifier(random_state=42, max_depth=max_depth)
 tree_model.fit(X_tree, y_tree)
 
 # Export to graphviz
