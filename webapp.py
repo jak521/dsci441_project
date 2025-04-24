@@ -4,7 +4,7 @@ from sklearn.linear_model import LogisticRegression
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.tree import DecisionTreeClassifier, export_graphviz, plot_tree
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 from io import BytesIO
@@ -213,3 +213,39 @@ plt.title('Confusion Matrix (Unbalanced)')
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 st.pyplot(plt)
+
+st.subheader("Decision Tree Plot Explorer")
+
+# Features and combinations
+features = ['RELPER', 'CURREL', 'FERTREC', 'INC_SDT1', 'SUCCESS', 'USGEN']
+feature_combos = []
+for r in range(1, len(features) + 1):
+    feature_combos.extend(itertools.combinations(features, r))
+
+combo_names = [', '.join(combo) for combo in feature_combos]
+
+# Tree combo selector
+selected_combo_tree = st.selectbox("Choose Features for Decision Tree:", combo_names, key='tree_combo')
+selected_features_tree = selected_combo_tree.split(', ')
+
+# Define X and y
+X_tree = df_tree[selected_features_tree]
+y_tree = df_tree['HAPPY_ONE_THREE']
+
+# Fit the decision tree
+tree_model = DecisionTreeClassifier(random_state=42, max_depth=5)
+tree_model.fit(X_tree, y_tree)
+
+# Export to graphviz
+dot_data = export_graphviz(
+    tree_model,
+    out_file=None,
+    feature_names=selected_features_tree,
+    class_names=['Unhappy', 'Happy'],
+    filled=True,
+    rounded=True,
+    special_characters=True
+)
+
+# Render graph in Streamlit
+st.graphviz_chart(dot_data)
