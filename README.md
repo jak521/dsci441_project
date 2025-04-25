@@ -26,6 +26,7 @@ Packages required:
 - sklearn
 - itertools
 - streamlit
+- gdown
 
 ## Running the Web App
 
