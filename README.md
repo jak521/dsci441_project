@@ -30,9 +30,10 @@ Packages required:
 
 ## Running the Web App
 
-Run the following command after you've added the CSV data file to the data folder:
+Run the following commands after you've added the CSV data file to the data folder:
 
 ```bash
+cd app
 streamlit run webapp.py
 ```
 
